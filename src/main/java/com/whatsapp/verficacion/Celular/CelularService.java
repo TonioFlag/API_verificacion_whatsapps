@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.whatsapp.verficacion.Celular.WhatsAppChecker.WhatsAppVerifier;
+import com.whatsapp.verficacion.WhatsAppChecker.WhatsAppVerifier;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,14 +31,10 @@ public class CelularService {
             Long monthBetween = ChronoUnit.MONTHS.between(dateConsul, now);
 
             if (monthBetween >= 6) {
-                if (verifier.isLoggin()) {
-                    String result = verifier.numberCheck(celular);
-                    exist.setWhatsapp(result);
-                    exist.setFecha(now);
-                    celularRepository.save(exist);
-                } else {
-                    exist.setWhatsapp("Sesión no iniciada. Genera un QR para iniciar sesión.");
-                }
+                String result = verifier.numberCheck(celular);
+                exist.setWhatsapp(result);
+                exist.setFecha(now);
+                celularRepository.save(exist);
             }
             return exist;
         } else {
@@ -46,12 +42,8 @@ public class CelularService {
             nuevo.setCelular(celular);
             nuevo.setFecha(now);
 
-            if (verifier.isLoggin()) {
-                String result = verifier.numberCheck(celular);
-                nuevo.setWhatsapp(result);
-            } else {
-                nuevo.setWhatsapp("Sesión no iniciada. Genera un QR para iniciar sesión.");
-            }
+            String result = verifier.numberCheck(celular);
+            nuevo.setWhatsapp(result);
 
             celularRepository.save(nuevo);
             return nuevo;
