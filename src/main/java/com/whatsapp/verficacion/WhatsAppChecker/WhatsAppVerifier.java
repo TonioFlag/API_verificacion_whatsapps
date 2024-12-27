@@ -6,6 +6,8 @@ import jakarta.annotation.PreDestroy;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -61,17 +63,24 @@ public class WhatsAppVerifier {
         driver = new ChromeDriver(options);
     }
 
-    public String getQR() {
+    public Map<String,String> getQR() {
         try {
             driver.get("https://web.whatsapp.com");
             Thread.sleep(4000);
+            String qrDataUrl = (String) ((JavascriptExecutor) driver).executeScript(
+            "var canvas = document.querySelector('canvas');" +
+            "return canvas ? canvas.toDataURL('image/png') : null;");
             WebElement qrElement = driver
                     .findElement(By.xpath(("//*[@id=\'app\']/div/div[2]/div[2]/div[1]/div/div/div[2]/div[2]/div[1]")));
             String qrData = qrElement.getAttribute("data-ref");
-            return qrData;
+            Map<String,String> qr = new HashMap<>();
+            qr.put("qrData",qrData);
+            qr.put("qrDataUrl", qrDataUrl);
+            return qr;
+            //<img src=qrDataUrl alt="QR Code">
         } catch (Exception e) {
             System.out.println("Error al obtener el QR:" + e.getMessage());
-            return "Error";
+            return null;
         }
     }
 
@@ -106,11 +115,11 @@ public class WhatsAppVerifier {
             }else if (element2 != null){
                 return "Si";
             }else{
-                return "Repetir";
+                return null;
             }
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
-            return "Error al buscar el número.";
+            return null;
         }
     }
 
@@ -146,6 +155,5 @@ public class WhatsAppVerifier {
     @PreDestroy
     public void cleanup() {
         driver.quit();
-        System.out.println("Se cerro el navegador.");
     }
 }

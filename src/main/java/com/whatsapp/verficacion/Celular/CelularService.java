@@ -2,6 +2,7 @@ package com.whatsapp.verficacion.Celular;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -22,15 +23,16 @@ public class CelularService {
     }
 
     public Celular verificarCelular(String celular) {
-        Optional<Celular> optionalCelular  = celularRepository.findByCelular(celular);
+        Optional<Celular> optionalCelular  = celularRepository.findById(celular);
         LocalDate now = LocalDate.now();
 
         if (optionalCelular.isPresent()) {
             Celular exist = optionalCelular.get();
             LocalDate dateConsul = exist.getFecha();
             Long monthBetween = ChronoUnit.MONTHS.between(dateConsul, now);
+            String verfiquier = exist.getWhatsapp();
 
-            if (monthBetween >= 6) {
+            if (monthBetween >= 6 || verfiquier == null) {
                 String result = verifier.numberCheck(celular);
                 exist.setWhatsapp(result);
                 exist.setFecha(now);
@@ -50,7 +52,7 @@ public class CelularService {
         }
     }
 
-    public String extractQR(){
+    public Object extractQR() {
         return verifier.getQR();
     }
 
@@ -59,7 +61,11 @@ public class CelularService {
         if (response.equals("Menú abierto")){
             return verifier.logout();
         }else{
-            return response;
+            return null;
         }
+    }
+
+    public List<Celular> getAll() {
+        return celularRepository.findAll();
     }
 }
